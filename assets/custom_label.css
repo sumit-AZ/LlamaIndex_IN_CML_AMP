@@ -1,0 +1,11 @@
+/* Filename: custom_gradio_style.css */
+
+/* Target all labels in the Gradio interface */
+.container {
+    font-size: 18px; /* Larger font size */
+    font-weight: bold; /* Make the text bold */
+    color: #7db5f5; /* A fresh, blue color */
+    padding: 8px 0; /* Add some top and bottom padding */
+    font-family: Arial, sans-serif; /* A commonly available font */
+}
+

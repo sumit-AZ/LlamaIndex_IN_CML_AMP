@@ -1,0 +1,45 @@
+name: AI Chat with your documents
+description: |
+  This AMP demonstrates how to use an open source pre-trained instruction-following LLM (Large Language Model) to build a ChatBot-like web application. The responses of the LLM are enhanced by giving it context from an internal knowledge base. This context is retrieved by using an open source Vector Database to do semantic search.
+
+author: Cloudera Inc.
+specification_version: 1.0
+prototype_version: 1.0
+date: "2024-04-22"
+
+runtimes:
+  - editor: PBJ Workbench
+    kernel: Python 3.11
+    edition: Nvidia GPU
+
+tasks:
+  - type: run_session
+    name: Check Dependencies
+    script: 0_session-install-dependencies/check-dependencies.py
+    short_summary: Check Dependencies
+    kernel: python3
+    cpu: 2
+    memory: 8
+  - type: run_session
+    name: Install Dependencies
+    script: 0_session-install-dependencies/install-dependencies.py
+    short_summary: Install Dependencies
+    kernel: python3
+    cpu: 2
+    memory: 8
+
+  - type: run_session
+    name: Download the models
+    script: 0_session-install-dependencies/download_huggingface_model.py
+    short_summary: Download the models from hugging face
+    kernel: python3
+    cpu: 2
+    memory: 8
+
+  - type: run_session
+    name: start the application
+    script: 0_session-install-dependencies/start_application.py
+    short_summary: Start the chat application
+    kernel: python3
+    cpu: 2
+    memory: 8
