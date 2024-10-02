@@ -59,7 +59,7 @@ if check_gpu_enabled() == False:
         cpu=6,
         memory=24,
         runtime_identifier=os.getenv("APP_IMAGE_ML_RUNTIME"),
-        bypass_authentication=True,
+        bypass_authentication=False,
         environment={"CML": "yes", "TOKENIZERS_PARALLELISM": "false"},
     )
 
@@ -75,7 +75,7 @@ else:
         memory=16,
         nvidia_gpu=1,
         runtime_identifier=os.getenv("APP_IMAGE_ML_RUNTIME"),
-        bypass_authentication=True,
+        bypass_authentication=False,
         environment={"CML": "yes", "TOKENIZERS_PARALLELISM": "false"},
     )
 
