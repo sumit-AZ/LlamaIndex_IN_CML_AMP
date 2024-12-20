@@ -1,0 +1,28 @@
+catalogue:
+  name: "LlamaIndex_IN_CML_AMP"
+  description: "A GitHub repository for integrating LlamaIndex into the CML AMP platform with additional features."
+  repository: "https://github.com/sumit-AZ/LlamaIndex_IN_CML_AMP"
+  branch: "main"
+  version: "1.0.0"
+  files:
+    - path: "/"
+      type: "directory"
+      description: "Root directory of the application, containing main scripts and configurations."
+    - path: "/README.md"
+      type: "file"
+      description: "Documentation describing how to use the app."
+    - path: "/src/"
+      type: "directory"
+      description: "Source files containing the core implementation."
+    - path: "/requirements.txt"
+      type: "file"
+      description: "Python dependencies required to run the application."
+  tags:
+    - "LlamaIndex"
+    - "CML"
+    - "AMP"
+    - "Python"
+  authors:
+    - name: "Sumit-AZ"
+      profile: "https://github.com/sumit-AZ"
+  license: "MIT"
