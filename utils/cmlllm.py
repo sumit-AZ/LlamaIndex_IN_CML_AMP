@@ -1,5 +1,13 @@
 import os
 import asyncio
+import logging
+import sys
+import torch
+import time
+import atexit
+import subprocess
+
+from dotenv import load_dotenv
 from mistral_ai.core.node_parser import SimpleNodeParser
 from mistral_ai.core import (
     VectorStoreIndex,
@@ -10,82 +18,58 @@ from mistral_ai.core import (
 from mistral_ai.readers.file import UnstructuredReader, PDFReader
 from mistral_ai.embeddings.huggingface import HuggingFaceEmbedding
 from mistral_ai.vector_stores.milvus import MilvusVectorStore
-from huggingface_hub import hf_hub_download, snapshot_download
-import time
-import torch
 from mistral_ai.models import MistralModel
 from mistral_ai.core.callbacks import DebugHandler, CallbackManager
 from mistral_ai.core.chat_engine.types import ChatMode
 from mistral_ai.core.postprocessor import SentenceEmbeddingOptimizer
 from utils.duplicate_preprocessing import DuplicateRemoverNodePostprocessor
-import logging
-import sys
-import subprocess
-import streamlit as st
-import atexit
-import utils.vectordb as vectordb
-from mistral_ai.core.memory import ChatMemoryBuffer
-from dotenv import load_dotenv
 from utils.common import supported_llm_models, supported_embed_models
+import utils.vectordb as vectordb
+import streamlit as st
 
+# Load environment variables
 load_dotenv()
-
 hf_token = os.getenv("HF_TOKEN")
 
+# Constants
 QUESTIONS_FOLDER = "questions"
 
+# Exit handler
 def exit_handler():
     print("Application is exiting!")
     vectordb.stop_vector_db()
 
 atexit.register(exit_handler)
 
+# Logging setup
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logging.getLogger().addHandler(logging.StreamHandler(stream=sys.stdout))
 
+# Debug and Callback setup
 debug_handler = DebugHandler(print_trace_on_end=True)
 callback_manager = CallbackManager(handlers=[debug_handler])
 
-def get_supported_embed_models():
-    return list(supported_embed_models)
+# Reset questions folder
+if os.path.exists(QUESTIONS_FOLDER):
+    for file in os.listdir(QUESTIONS_FOLDER):
+        file_path = os.path.join(QUESTIONS_FOLDER, file)
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+    os.rmdir(QUESTIONS_FOLDER)
 
-chat_engine_map = {}
+os.makedirs(QUESTIONS_FOLDER, exist_ok=True)
 
-def get_supported_models():
-    return list(supported_llm_models)
-
-active_collection_available = {"Default": False}
-
-def get_active_collections():
-    return list(active_collection_available)
-
-print("Resetting the questions folder...")
-subprocess.run([f"rm -rf {QUESTIONS_FOLDER}"], shell=True)
-
+# Reset and start vector DB
 milvus_start = vectordb.reset_vector_db()
 print(f"Milvus started: {milvus_start}")
 
+# Chat engine map
+chat_engine_map = {}
 
-def infer2(msg, history, collection_name):
-    query_text = msg
-    print(f"Query: {query_text}, Collection: {collection_name}")
+# Active collection map
+active_collection_available = {"Default": False}
 
-    if len(query_text) == 0:
-        return "Please ask some questions"
-
-    if collection_name not in chat_engine_map:
-        return f"Chat engine not created for collection {collection_name}."
-
-    chat_engine = chat_engine_map[collection_name]
-
-    try:
-        streaming_response = chat_engine.stream_chat(query_text)
-        for token in streaming_response.response_gen:
-            yield token
-    except Exception as e:
-        print(f"Error: {e}")
-        return f"Failed with exception: {e}"
-
+# Streamlit caching decorator
 @st.cache_resource
 class CMLLLM:
     MODELS_PATH = "./models"
@@ -107,16 +91,14 @@ class CMLLLM:
         similarity_top_k=2,
         progress_bar=None,
     ):
-        if len(model_name) == 0:
-            model_name = "mistralai/Mistral-7B"
-        if len(embed_model_name) == 0:
-            embed_model_name = "thenlper/gte-large"
+        # Set defaults if models are not provided
+        model_name = model_name or "mistralai/Mistral-7B"
+        embed_model_name = embed_model_name or "thenlper/gte-large"
         self.active_model_name = model_name
         self.active_embed_model_name = embed_model_name
-        n_gpu_layers = 0
-        if torch.cuda.is_available():
-            print("Using GPU.")
-            n_gpu_layers = gpu_layers
+        n_gpu_layers = gpu_layers if torch.cuda.is_available() else 0
+
+        print(f"Using {'GPU' if n_gpu_layers else 'CPU'}.")
 
         self.node_parser = SimpleNodeParser(chunk_size=1024, chunk_overlap=128)
 
@@ -170,7 +152,9 @@ class CMLLLM:
         Settings.node_parser = node_parser
 
     def get_model_path(self, model_name):
-        filename = supported_llm_models[model_name]
+        filename = supported_llm_models.get(model_name)
+        if not filename:
+            raise ValueError(f"Unsupported model: {model_name}")
         model_path = hf_hub_download(
             repo_id=model_name,
             filename=filename,
@@ -180,3 +164,23 @@ class CMLLLM:
             token=hf_token,
         )
         return model_path
+
+def infer2(msg, history, collection_name):
+    query_text = msg.strip()
+    print(f"Query: {query_text}, Collection: {collection_name}")
+
+    if not query_text:
+        return "Please ask some questions."
+
+    if collection_name not in chat_engine_map:
+        return f"Chat engine not created for collection {collection_name}."
+
+    chat_engine = chat_engine_map[collection_name]
+
+    try:
+        streaming_response = chat_engine.stream_chat(query_text)
+        for token in streaming_response.response_gen:
+            yield token
+    except Exception as e:
+        logging.error(f"Error: {e}")
+        yield f"Failed with exception: {e}"
