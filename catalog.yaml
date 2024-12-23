@@ -1,17 +1,17 @@
 name: Cloudera
 
-- title: LLM PDF Document Chatbot
-  label: intelligent-writing-assistance
-  short_description: >-
-    A demonstration of how CML can host LLM models using HuggingFace and Gradio.
-  long_description: >-
+  git_url: "https://github.com/sumit-AZ/LlamaIndex_IN_CML_AMP.git"
+  is_prototype: true
+- title: "LLM PDF Document Chatbot"
+  label: "intelligent-writing-assistance"
+  short_description: "A demonstration of how CML can host LLM models using HuggingFace and Gradio."
+  long_description: >
     The goal of this application is to demonstrate how an Open Source LLM model
     can be deployed on CML. The application is built using the RAG architecture
     with an in-memory Chroma Database.
-  image_path: >-
-    https://github.com/sumit-AZ/LlamaIndex_IN_CML_AMP/blob/main/images/logo.png?raw=true
+  image_path: "https://github.com/sumit-AZ/LlamaIndex_IN_CML_AMP/blob/main/images/logo.png?raw=true"
   tags:
-    - LLM
-    - streamlit
+    - "LLM"
+    - "streamlit"
   git_url: "https://github.com/sumit-AZ/LlamaIndex_IN_CML_AMP.git"
   is_prototype: true
