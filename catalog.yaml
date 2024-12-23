@@ -3,9 +3,11 @@ name: CML Workshop
 entries:
    - title: Cloudera Machine Learning Workshop
      label: churn-prediction
-     short_description: Build an scikit-learn model to predict churn using customer telco data, with MlFlow Experiments
+     short_description: A demonstration of how CML can host LLM models using HuggingFace and streamit
      long_description: >-
-        This project is used for CML Workshop. 
+        The goal of this application is to demonstrate how an Open Source LLM model
+        can be deployed on CML. The application is built using the RAG architecture
+        with an in-memory Chroma Database. 
      image_path: "https://github.com/sumit-AZ/LlamaIndex_IN_CML_AMP/blob/main/assets/images/logo.png"
      tags:
       - Churn Prediction
