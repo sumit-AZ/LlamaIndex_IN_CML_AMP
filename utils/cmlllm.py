@@ -1,4 +1,9 @@
+import mistralai
+import requests
+import numpy as np
+import faiss
 import os
+from getpass import getpass
 import asyncio
 import logging
 import sys
@@ -8,20 +13,21 @@ import atexit
 import subprocess
 
 from dotenv import load_dotenv
-from mistral_ai.core.node_parser import SimpleNodeParser
-from mistral_ai.core import (
+from mistralai import Mistral
+from mistralai.core.node_parser import SimpleNodeParser
+from mistralai.core import (
     VectorStoreIndex,
     StorageContext,
     SimpleDirectoryReader,
     Settings,
 )
-from mistral_ai.readers.file import UnstructuredReader, PDFReader
-from mistral_ai.embeddings.huggingface import HuggingFaceEmbedding
-from mistral_ai.vector_stores.milvus import MilvusVectorStore
-from mistral_ai.models import MistralModel
-from mistral_ai.core.callbacks import DebugHandler, CallbackManager
-from mistral_ai.core.chat_engine.types import ChatMode
-from mistral_ai.core.postprocessor import SentenceEmbeddingOptimizer
+from mistralai.readers.file import UnstructuredReader, PDFReader
+from mistralai.embeddings.huggingface import HuggingFaceEmbedding
+from mistralai.vector_stores.milvus import MilvusVectorStore
+from mistralai.models import MistralModel
+from mistralai.core.callbacks import DebugHandler, CallbackManager
+from mistralai.core.chat_engine.types import ChatMode
+from mistralai.core.postprocessor import SentenceEmbeddingOptimizer
 from utils.duplicate_preprocessing import DuplicateRemoverNodePostprocessor
 from utils.common import supported_llm_models, supported_embed_models
 import utils.vectordb as vectordb
